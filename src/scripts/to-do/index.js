@@ -50,6 +50,8 @@ let TODO = (() => {
             }
             //FIX two digits
         });
+
+        saveWork();
     };
 
     const getItemByID = (IDString) => {
@@ -64,6 +66,15 @@ let TODO = (() => {
         return item;
     };
 
+    const saveWork = () => {};
+
+    const moveItem = (itemID, newParentID) => {
+        const draggedCardCpy = {...TODO.getItemByID(itemID)};
+        TODO.deleteItemByID(itemID);
+        TODO.getItemByID(newParentID).children[itemID] = draggedCardCpy;
+        saveWork();
+    };
+
     let ID = 0; //TODO: random letters&numbers
     //profileID-projectID-GoalID-subGoalID
 
@@ -71,6 +82,7 @@ let TODO = (() => {
         let profileID = (++ID).toString();
         profiles['children'][profileID] = profile.factory(profileID, ...args);
         profiles['children'][profileID]['children'] = {};
+        saveWork();
         return profileID;
     };
     const createProject = function (profileID, ...args) {
@@ -80,6 +92,7 @@ let TODO = (() => {
         let projectID = profileID + '-' + ++ID;
         projects[projectID] = project.factory(projectID, ...args);
         profiles['children'][profileID]['children'][projectID]['children'] = {};
+        saveWork();
         return projectID;
     };
     const createGoal = function (profileID, projectID, ...args) {
@@ -88,6 +101,7 @@ let TODO = (() => {
         let goalID = projectID + '-' + ++ID;
         goals[goalID] = goal.factory(goalID, ...args);
         profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'] = {};
+        saveWork();
         return goalID;
     };
     const createSubGoal = function (profileID, projectID, goalID, ...args) {
@@ -95,6 +109,7 @@ let TODO = (() => {
         subGoals = profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'];
         let subGoalID = goalID + '-' + ++ID;
         subGoals[subGoalID] = subGoal.factory(subGoalID, ...args);
+        saveWork();
         return subGoalID;
     };
 
@@ -110,7 +125,9 @@ let TODO = (() => {
         createSubGoal,
         TAGS: {list: TAGS.list, createTag: TAGS.createTag, deleteTag: TAGS.deleteTag},
         getItemByID,
-        deleteItemByID
+        deleteItemByID,
+        moveItem,
+        saveWork
     };
 })();
 

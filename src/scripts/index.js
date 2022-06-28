@@ -1,3 +1,15 @@
+//TODO: BASIC and MUST
+//* delete goal|subgoal (UI)
+//* modify goal|subgoal
+//* local storage
+//TODO: COOL and OPTIONAL
+//* more info in goals&subgoals
+//* timer
+//* links
+//* backgrounds/imageHeading
+//* accounts/auth & storage
+//* github sync
+
 import '../styles/index.scss';
 import TODO from './to-do';
 
@@ -63,6 +75,11 @@ document.addEventListener('dragstart', (e) => {
 document.addEventListener('dragend', (e) => {
     if (e.target.classList.contains('card') && e.target.hasAttribute('data-beingDragged')) {
         e.target.removeAttribute('data-beingDragged');
+
+        const draggedCardID = e.target.getAttribute('data-id');
+        const draggedCardNewParentID = e.target.closest('.cards-container').getAttribute('data-id');
+        TODO.moveItem(draggedCardID, draggedCardNewParentID);
+
         [...document.querySelectorAll('.cards-container')].forEach((cardContainer) => {
             [...cardContainer.children].forEach((card) => {
                 card.style.pointerEvents = 'none';
