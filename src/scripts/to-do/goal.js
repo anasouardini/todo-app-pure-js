@@ -17,7 +17,7 @@ let Goal = (() => {
         console.log('');
     };
 
-    let factory = (ID, tags = [], style = {}, title = 'Untitled', desc = '', dueDate = 'undetermined', notes = '') => {
+    let factory = function (ID, tags = [], style = {}, title = 'Untitled', desc = '', dueDate = 'undetermined', notes = '') {
         //TODO: check args
         return {ID, tags, style, title, desc, dueDate, notes};
     };

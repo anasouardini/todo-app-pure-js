@@ -9,19 +9,19 @@ let TODO = (() => {
         list: [
             {
                 ID: '',
-                background: '#8ada25',
-                color: '#000',
+                background: '#27ae60',
+                color: '#fff',
                 text: 'Not Done'
             },
             {
                 ID: '',
-                background: 'yellow',
-                color: '#000',
+                background: '#d35400',
+                color: '#fff',
                 text: 'In Progress'
             },
             {
                 ID: '',
-                background: 'red',
+                background: '#2c3e50',
                 color: '#fff',
                 text: 'Done'
             }
@@ -36,15 +36,30 @@ let TODO = (() => {
 
     let profiles = {children: {}};
 
-    const getItemByID = (IDString) => {
-        //TODO: Optimize
+    const deleteItemByID = (IDString) => {
         let item = profiles;
         const IDs = IDString.split('-');
-        IDs.forEach((id, index) => {
-            for (let i = index - 1; i >= 0; i--) {
-                id = IDs[i] + '-' + id;
+        let length = 0;
+        IDs.forEach((id) => {
+            length += id.length + 1;
+            let itemID = IDString.slice(0, length - 1);
+            if (length >= IDString.length) {
+                delete item['children'][itemID];
+            } else {
+                item = item['children'][itemID]; //-1 for the last '-'
             }
-            item = item['children'][id];
+            //FIX two digits
+        });
+    };
+
+    const getItemByID = (IDString) => {
+        let item = profiles;
+        const IDs = IDString.split('-');
+        let length = 0;
+        IDs.forEach((id) => {
+            length += id.length + 1;
+            item = item['children'][IDString.slice(0, length - 1)]; //-1 for the last '-'
+            //FIX two digits
         });
         return item;
     };
@@ -55,42 +70,31 @@ let TODO = (() => {
     const createProfile = function (...args) {
         let profileID = (++ID).toString();
         profiles['children'][profileID] = profile.factory(profileID, ...args);
+        profiles['children'][profileID]['children'] = {};
         return profileID;
     };
     const createProject = function (profileID, ...args) {
         let projects = {};
-        if (!profiles['children'][profileID].hasOwnProperty('children')) {
-            profiles['children'][profileID]['children'] = {};
-            projects = profiles['children'][profileID]['children'];
-        } else {
-            projects = profiles['children'][profileID]['children'];
-        }
+
+        projects = profiles['children'][profileID]['children'];
         let projectID = profileID + '-' + ++ID;
-        projects[projectID] = project.factory(projectID, ...args.slice(1));
+        projects[projectID] = project.factory(projectID, ...args);
+        profiles['children'][profileID]['children'][projectID]['children'] = {};
         return projectID;
     };
     const createGoal = function (profileID, projectID, ...args) {
         let goals = {};
-        if (!profiles['children'][profileID]['children'][projectID].hasOwnProperty('children')) {
-            profiles['children'][profileID]['children'][projectID]['children'] = {};
-            goals = profiles['children'][profileID]['children'][projectID]['children'];
-        } else {
-            goals = profiles['children'][profileID]['children'][projectID]['children'];
-        }
+        goals = profiles['children'][profileID]['children'][projectID]['children'];
         let goalID = projectID + '-' + ++ID;
-        goals[goalID] = goal.factory(goalID, ...args.slice(2));
+        goals[goalID] = goal.factory(goalID, ...args);
+        profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'] = {};
         return goalID;
     };
     const createSubGoal = function (profileID, projectID, goalID, ...args) {
         let subGoals = {};
-        if (!profiles['children'][profileID]['children'][projectID]['children'][goalID].hasOwnProperty('children')) {
-            profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'] = {};
-            subGoals = profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'];
-        } else {
-            subGoals = profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'];
-        }
+        subGoals = profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'];
         let subGoalID = goalID + '-' + ++ID;
-        subGoals[subGoalID] = subGoal.factory(subGoalID, ...args.slice(3));
+        subGoals[subGoalID] = subGoal.factory(subGoalID, ...args);
         return subGoalID;
     };
 
@@ -105,7 +109,8 @@ let TODO = (() => {
         createGoal,
         createSubGoal,
         TAGS: {list: TAGS.list, createTag: TAGS.createTag, deleteTag: TAGS.deleteTag},
-        getItemByID
+        getItemByID,
+        deleteItemByID
     };
 })();
 
