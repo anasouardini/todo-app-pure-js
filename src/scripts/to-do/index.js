@@ -66,51 +66,103 @@ let TODO = (() => {
         return item;
     };
 
-    const saveWork = () => {};
+    const saveWork = () => {
+        localStorage.setItem('profilesObj', JSON.stringify(profiles));
+    };
+
+    const loadSavedWork = () => {
+        const oldProfiles = JSON.parse(localStorage.getItem('profilesObj'));
+        if (oldProfiles) {
+            profiles = oldProfiles;
+            console.log(profiles);
+        }
+    };
+
+    const showSavedWork = () => {
+        if (Object.keys(profiles.children).length) {
+            const firstProfile = profiles.children[Object.keys(profiles.children)[0]];
+            const firstProject = firstProfile.children[Object.keys(firstProfile.children)[0]];
+            DOM.drawProject(firstProject, document.querySelector('.project-board'));
+        }
+    };
+
+    const burnWork = () => {
+        localStorage.removeItem('profilesObj');
+    };
 
     const moveItem = (itemID, newParentID) => {
         const draggedCardCpy = {...TODO.getItemByID(itemID)};
         TODO.deleteItemByID(itemID);
-        TODO.getItemByID(newParentID).children[itemID] = draggedCardCpy;
+        const newItemID = genID();
+        draggedCardCpy.ID = newParentID + '-' + newItemID;
+        TODO.getItemByID(newParentID).children[draggedCardCpy.ID] = draggedCardCpy;
         saveWork();
+        return draggedCardCpy.ID;
     };
 
     let ID = 0; //TODO: random letters&numbers
     //profileID-projectID-GoalID-subGoalID
+    let IDsList = [];
+    const genID = () => {
+        let rand = Math.ceil(Math.random() * 999999999999).toString();
+        while (IDsList.includes(rand)) {
+            rand = Math.ceil(Math.random() * 999999999999).toString();
+        }
+        IDsList.push(rand);
+        return rand;
+    };
 
-    const createProfile = function (...args) {
-        let profileID = (++ID).toString();
+    const createProfile = (...args) => {
+        let profileID = genID();
         profiles['children'][profileID] = profile.factory(profileID, ...args);
         profiles['children'][profileID]['children'] = {};
         saveWork();
         return profileID;
     };
-    const createProject = function (profileID, ...args) {
+    const createProject = (profileID, ...args) => {
         let projects = {};
 
         projects = profiles['children'][profileID]['children'];
-        let projectID = profileID + '-' + ++ID;
+        let projectID = profileID + '-' + genID();
         projects[projectID] = project.factory(projectID, ...args);
         profiles['children'][profileID]['children'][projectID]['children'] = {};
         saveWork();
         return projectID;
     };
-    const createGoal = function (profileID, projectID, ...args) {
+    const createGoal = (profileID, projectID, ...args) => {
         let goals = {};
         goals = profiles['children'][profileID]['children'][projectID]['children'];
-        let goalID = projectID + '-' + ++ID;
+        let goalID = projectID + '-' + genID();
         goals[goalID] = goal.factory(goalID, ...args);
         profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'] = {};
         saveWork();
         return goalID;
     };
-    const createSubGoal = function (profileID, projectID, goalID, ...args) {
+    const createSubGoal = (profileID, projectID, goalID, ...args) => {
         let subGoals = {};
         subGoals = profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'];
-        let subGoalID = goalID + '-' + ++ID;
+        let subGoalID = goalID + '-' + genID();
         subGoals[subGoalID] = subGoal.factory(subGoalID, ...args);
         saveWork();
         return subGoalID;
+    };
+
+    const modifySubGoal = (subGoal, title = '', description = '', notes = '', tags = [], dueDate = '') => {
+        subGoal.title = title;
+        subGoal.description = description;
+        subGoal.notes = notes;
+        subGoal.tags = tags;
+        subGoal.dueDate = dueDate;
+        saveWork();
+    };
+
+    const modifyGoal = (goal, title = '', description = '', notes = '', tags = [], dueDate = '') => {
+        goal.title = title;
+        goal.description = description;
+        goal.notes = notes;
+        goal.tags = tags;
+        goal.dueDate = dueDate;
+        saveWork();
     };
 
     return {
@@ -123,11 +175,16 @@ let TODO = (() => {
         createProject,
         createGoal,
         createSubGoal,
+        modifySubGoal,
+        modifyGoal,
         TAGS: {list: TAGS.list, createTag: TAGS.createTag, deleteTag: TAGS.deleteTag},
         getItemByID,
         deleteItemByID,
         moveItem,
-        saveWork
+        saveWork,
+        loadSavedWork,
+        showSavedWork,
+        burnWork
     };
 })();
 
