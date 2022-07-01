@@ -431,7 +431,7 @@ let todoDOM = (() => {
         settingPannelControls_DOM.appendChild(cancelBtn_DOM);
     };
 
-    const deleteItem = (targetID_DOM) => {
+    const deleteItem_DOM = (targetID_DOM) => {
         document.querySelector(`[data-id="${targetID_DOM}"]`).remove();
     };
 
@@ -446,7 +446,7 @@ let todoDOM = (() => {
         drawNewSubGoalPanel,
         removePanel,
         drawModificationPanel,
-        deleteItem
+        deleteItem_DOM
     };
 })();
 

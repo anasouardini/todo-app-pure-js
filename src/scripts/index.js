@@ -7,7 +7,7 @@
 //* links
 //* backgrounds/imageHeading
 //* accounts/auth & storage
-//* github sync
+//* github sync(links that takes you to exact piece of code you wanna change, etc)
 
 import '../styles/index.scss';
 import TODO from './to-do';
@@ -88,7 +88,7 @@ document.addEventListener('click', (e) => {
     } else if (e.target == document.querySelector('.settings-panel button.delete')) {
         const targetID = e.target.closest('.settings-panel').getAttribute('data-id');
         TODO.deleteItemByID(targetID); //delete form the object
-        TODO.DOM.deleteItem(targetID); //delete from the UI
+        TODO.DOM.deleteItem_DOM(targetID); //delete from the UI
         TODO.DOM.removePanel();
         // console.log(TODO.getItemByID(e.target.closest('.settings-panel').getAttribute('data-parent-id')));
     }

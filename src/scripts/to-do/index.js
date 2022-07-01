@@ -1,10 +1,7 @@
 import DOM from './DOM';
-import profile from './profile';
-import project from './project';
-import goal from './goal';
-import subGoal from './subgoal';
+import factories from './factories';
 
-let TODO = (() => {
+const TODO = (() => {
     let TAGS = {
         list: [
             {
@@ -32,6 +29,17 @@ let TODO = (() => {
         deleteTag: (index) => {
             TAGS.splice(index);
         }
+    };
+
+    //profileID-projectID-GoalID-subGoalID
+    let IDsList = [];
+    const genID = () => {
+        let rand = Math.ceil(Math.random() * 999999999999).toString();
+        while (IDsList.includes(rand)) {
+            rand = Math.ceil(Math.random() * 999999999999).toString();
+        }
+        IDsList.push(rand);
+        return rand;
     };
 
     let profiles = {children: {}};
@@ -90,6 +98,7 @@ let TODO = (() => {
         localStorage.removeItem('profilesObj');
     };
 
+    //TODO: make it generic, update the new parent's UI | add DOM.moveItem_DOM
     const moveItem = (itemID, newParentID) => {
         const draggedCardCpy = {...TODO.getItemByID(itemID)};
         TODO.deleteItemByID(itemID);
@@ -100,21 +109,10 @@ let TODO = (() => {
         return draggedCardCpy.ID;
     };
 
-    let ID = 0; //TODO: random letters&numbers
-    //profileID-projectID-GoalID-subGoalID
-    let IDsList = [];
-    const genID = () => {
-        let rand = Math.ceil(Math.random() * 999999999999).toString();
-        while (IDsList.includes(rand)) {
-            rand = Math.ceil(Math.random() * 999999999999).toString();
-        }
-        IDsList.push(rand);
-        return rand;
-    };
-
+    //CREATION
     const createProfile = (...args) => {
         let profileID = genID();
-        profiles['children'][profileID] = profile.factory(profileID, ...args);
+        profiles['children'][profileID] = factories.profile(profileID, ...args);
         profiles['children'][profileID]['children'] = {};
         saveWork();
         return profileID;
@@ -124,7 +122,7 @@ let TODO = (() => {
 
         projects = profiles['children'][profileID]['children'];
         let projectID = profileID + '-' + genID();
-        projects[projectID] = project.factory(projectID, ...args);
+        projects[projectID] = factories.project(projectID, ...args);
         profiles['children'][profileID]['children'][projectID]['children'] = {};
         saveWork();
         return projectID;
@@ -133,7 +131,7 @@ let TODO = (() => {
         let goals = {};
         goals = profiles['children'][profileID]['children'][projectID]['children'];
         let goalID = projectID + '-' + genID();
-        goals[goalID] = goal.factory(goalID, ...args);
+        goals[goalID] = factories.goal(goalID, ...args);
         profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'] = {};
         saveWork();
         return goalID;
@@ -142,11 +140,12 @@ let TODO = (() => {
         let subGoals = {};
         subGoals = profiles['children'][profileID]['children'][projectID]['children'][goalID]['children'];
         let subGoalID = goalID + '-' + genID();
-        subGoals[subGoalID] = subGoal.factory(subGoalID, ...args);
+        subGoals[subGoalID] = factories.subgoal(subGoalID, ...args);
         saveWork();
         return subGoalID;
     };
 
+    //MODIFICATION
     const modifySubGoal = (subGoal, title = '', description = '', notes = '', tags = [], dueDate = '') => {
         subGoal.title = title;
         subGoal.description = description;
@@ -165,12 +164,9 @@ let TODO = (() => {
         saveWork();
     };
 
+    //EXPORTS
     return {
-        profile,
-        project,
-        goal,
         DOM,
-        subGoal,
         createProfile,
         createProject,
         createGoal,
